@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+google-generativeai
+optbinning
+ydata-profiling
+sweetviz
+plotly
