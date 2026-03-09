@@ -1,8 +1,15 @@
+# 핵심 프레임워크
 streamlit
+
+# 데이터 처리 및 시각화
 pandas
 numpy
-google-generativeai
-optbinning
-ydata-profiling
-sweetviz
 plotly
+
+# AI 모델
+google-generativeai
+
+# EDA 라이브러리 (버전 충돌 방지를 위해 버전 명시 권장)
+optbinning
+sweetviz
+ydata-profiling
