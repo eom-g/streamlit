@@ -64,14 +64,39 @@ if st.session_state.step >= 2:
     st.divider()
     st.header("Step 3. 최종 분석 셋업 확인 및 수정")
     
-    st.info("💡 AI가 Feature Store에서 다음 변수들을 선별했습니다. 분석에 포함할 항목을 최종 확인하세요.")
+    st.info(f"💡 1,500개의 피처 중, AI가 목적에 맞는 **{len(st.session_state.mapped_features)}개**를 우선 선별했습니다.")
     
-    # 변수 태그 UI 시뮬레이션 (Multiselect 활용)
-    final_features = st.multiselect(
-        "선별된 변수 리스트 (X Features)",
-        options=st.session_state.mapped_features + ["추가_변수_A", "추가_변수_B"],
-        default=st.session_state.mapped_features
-    )
+    # 1. AI가 추천한 변수를 '태그' 형태로 먼저 보여줌 (멀티셀렉트지만 기본값이 선택되어 있음)
+    col_feat, col_search = st.columns([0.7, 0.3])
+    
+    with col_feat:
+        final_features = st.multiselect(
+            "✅ 선택된 분석 변수 (AI 추천 항목)",
+            options=st.session_state.mapped_features + ["더 보기..."], # 실제로는 여기에 전체 리스트를 다 넣지 않음
+            default=st.session_state.mapped_features,
+            help="AI가 선별한 변수입니다. 부적절하면 X를 눌러 제거하세요."
+        )
+
+    with col_search:
+        # 2. 1500개 피처 대응을 위한 검색창
+        st.write("🔍 추가 변수 찾기")
+        search_query = st.text_input("피처명 또는 설명 검색", placeholder="예: 요금제, 데이터...")
+        if search_query:
+            # 시뮬레이션: 검색어에 따른 결과 리턴
+            st.write(f"'{search_query}' 관련 검색 결과:")
+            st.button(f"➕ {search_query}_var_01 추가")
+            st.button(f"➕ {search_query}_usage_avg 추가")
+
+    # 3. 카테고리별 묶음 (Expander 활용) - 1500개를 관리하는 효율적 방법
+    with st.expander("📂 카테고리별 전체 피처 보기 (Feature Store 그룹별)"):
+        tab_comm, tab_usage, tab_device = st.tabs(["통신/계약", "서비스 이용", "단말기 정보"])
+        with tab_comm:
+            st.checkbox("연령/성별 정보 그룹 (5개)")
+            st.checkbox("납부/연체 이력 그룹 (12개)")
+        with tab_usage:
+            st.checkbox("App 이용 패턴 그룹 (150개)")
+        with tab_device:
+            st.checkbox("단말 스펙 정보 그룹 (30개)")
     
     st.subheader("📝 최종 로직 요약")
     if mode == "🏢 사업팀 인사이트 모드":
