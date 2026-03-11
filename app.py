@@ -41,13 +41,17 @@ META_TABLE = {
         "svc_stus_period": "서비스 가입 기간(개월)",
         "membership_grade": "멤버십 등급",
         "vas_join_cnt": "부가서비스 가입 개수",
-        "complain_yn": "최근 3개월 민원 발생 여부"
+        "m3_membership_use_cnt": "최근 3개월 멤버십 이용 건수",
+        "lnwls_cnvg_yn" : "유무선 결합 여부"
     },
     "웹앱 접속": {
         "app_launch_cnt": "자사 앱 실행 횟수",
         "top_access_app": "최다 접속 앱 카테고리",
         "data_usage_mb": "웹/앱 데이터 사용량(MB)",
-        "night_access_ratio": "심야 시간대 접속 비중"
+        "night_access_ratio": "심야 시간대 접속 비중",
+        "m3_ytbe_wbap_cnt": "최근 3개월 유튜브 웹앱 접속 건수", 
+        "m3_sns_wbap_cnt": "최근 3개월 SNS 웹앱 접속 건수",
+        "m3_simp_stlm_wbap_cnt": "최근 3개월 간편결제 웹앱 접속 건수"
     }
 }
 
@@ -101,7 +105,7 @@ if mode == "🏢 Target Profiling Mode":
         with st.spinner("AI가 가설을 해석하여 메타 테이블에서 지표를 찾는 중..."):
             time.sleep(1)
             # AI 선별 결과 (메타 테이블에 있는 이름만 정확히 넣어야 함)
-            st.session_state.mapped_kor = ["고객 연령", "고객 성별", "최근 3개월 유튜브 웹앱 접속 건수", "최근 3개월 SNS 웹앱 접속 건수", "최근 1개월 데이터 사용량", "최근 3개월 간편결제 웹앱 접속 건수"]
+            st.session_state.mapped_kor = ["고객 연령", "고객 성별", "최근 3개월 유튜브 웹앱 접속 건수", "최근 3개월 SNS 웹앱 접속 건수", "웹/앱 데이터 사용량(MB)", "최근 3개월 간편결제 웹앱 접속 건수"]
             st.session_state.step = 2
             st.rerun()
 
@@ -122,7 +126,7 @@ else:
     if st.button("🔍 데이터 품질 진단 셋업 시작"):
         with st.spinner("AI가 변수를 선별 중..."):
             time.sleep(1)
-            st.session_state.mapped_kor = ["고객 연령", "서비스 가입 기간(개월)", "최근 3개월 멤버십 이용 건수", "유무선 결합 여부", "최근 1개월 데이터 사용량"]
+            st.session_state.mapped_kor = ["고객 연령", "서비스 가입 기간(개월)", "최근 3개월 멤버십 이용 건수", "유무선 결합 여부", "웹/앱 데이터 사용량(MB)"]
             st.session_state.step = 2
             st.rerun()
 
