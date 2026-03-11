@@ -110,7 +110,7 @@ else:
         c_missing.number_input("결측치 허용(%)", 0, 100, 30)
         c_corr.number_input("상관관계 임계치", 0.0, 1.0, 0.8)
     
-    analyst_goal = st.text_area("📝 상세 분석 목적", placeholder="예: 해지 예측 모델용 피처들의 품질 진단 및 변수 선택 가이드 요청", height=100)
+    analyst_goal = st.text_area("📝 상세 분석 목적", placeholder="예: 기변 예측 모델용 피처들의 품질 진단 및 변수 선택 가이드 요청", height=100)
 
     if st.button("🔍 데이터 품질 진단 셋업 시작"):
         with st.spinner("AI가 분석 목적을 이해하고 변수를 선별 중..."):
