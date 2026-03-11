@@ -57,31 +57,38 @@ ALL_KOR_NAMES = list(KOR_TO_ENG.keys())
 # --- 2. 페이지 설정 ---
 st.set_page_config(page_title="Gen-AI EDA Agent Prototype", layout="wide")
 
+# 세션 관리 (모드 변경 시 초기화 로직 포함)
 if 'step' not in st.session_state:
     st.session_state.step = 1
 if 'mapped_kor' not in st.session_state:
     st.session_state.mapped_kor = []
+if 'current_mode' not in st.session_state:
+    st.session_state.current_mode = ""
 
 # --- 메인 화면 ---
-st.title("🔍 EDA Agent")
-st.caption("BigQuery 기반 데이터 탐색 및 한글 물리명 기반 변수 셋업 프로토타입")
+st.title("🔍 Gen-AI EDA Agent")
+st.caption("BigQuery 기반 데이터 탐색 및 한글 물리명 기반 변수 셋업")
 
 # --- STEP 1: 분석 모드 선택 ---
 st.header("Step 1. 분석 모드 선택")
 mode = st.radio(
     "분석 목적에 맞는 모드를 선택해주세요.",
-    ["🏢 사업팀 인사이트 모드", "🧪 분석가 데이터 진단 모드"],
-    horizontal=True,
-    key="mode_selector"
+    ["🏢 Target Profiling Mode", "🧪 Feature Engineering Mode"],
+    horizontal=True
 )
+
+# 모드가 바뀌면 Step 3를 닫고 매핑 리스트를 비웁니다 (에러 방지 핵심)
+if st.session_state.current_mode != mode:
+    st.session_state.current_mode = mode
+    st.session_state.step = 1
+    st.session_state.mapped_kor = []
 
 st.divider()
 
 # --- STEP 2: 모드별 동적 입력 화면 ---
 st.header("Step 2. 분석 목적 및 조건 입력")
 
-if mode == "🏢 사업팀 인사이트 모드":
-    # 사업팀 전용 UI
+if mode == "🏢 Target Profiling Mode":
     st.subheader("🏢 Business Insight Setup")
     col1, col2 = st.columns(2)
     with col1:
@@ -92,47 +99,47 @@ if mode == "🏢 사업팀 인사이트 모드":
     
     if st.button("🪄 가설 기반 지표 매핑 시작"):
         with st.spinner("AI가 가설을 해석하여 메타 테이블에서 지표를 찾는 중..."):
-            time.sleep(1.2)
+            time.sleep(1)
+            # AI 선별 결과 (메타 테이블에 있는 이름만 정확히 넣어야 함)
             st.session_state.mapped_kor = ["고객 연령", "고객 성별", "최근 3개월 유튜브 웹앱 접속 건수", "최근 3개월 SNS 웹앱 접속 건수", "최근 1개월 데이터 사용량", "최근 3개월 간편결제 웹앱 접속 건수"]
             st.session_state.step = 2
+            st.rerun()
 
 else:
-    # 분석가 전용 UI
     st.subheader("🧪 Data Analyst Setup")
     col1, col2 = st.columns(2)
     with col1:
-        y_label = st.text_input("🎯 Target (Y Label) 지정 (필수)", placeholder="예: 모바일 프리미엄 단말 사용 여부")
-        is_unsupervised = st.checkbox("Unsupervised 모드 (Y Label 없음)")
+        y_label = st.text_input("🎯 Target (Y Label) 지정", placeholder="예: 모바일 프리미엄 단말 사용")
+        st.checkbox("Unsupervised 모드 (Y Label 없음)")
     with col2:
-        st.write("⚙️ 진단 기준 설정 (선택)")
-        c_outlier, c_missing, c_corr = st.columns(3)
-        c_outlier.select_slider("이상치(IQR)", options=[1.5, 2.0, 3.0], value=1.5)
+        st.write("⚙️ 진단 기준 설정")
+        c_outlier, c_missing = st.columns(2)
+        c_outlier.select_slider("이상치 기준(IQR)", options=[1.5, 2.0, 3.0], value=1.5)
         c_missing.number_input("결측치 허용(%)", 0, 100, 30)
-        c_corr.number_input("상관관계 임계치", 0.0, 1.0, 0.8)
     
-    analyst_goal = st.text_area("📝 상세 분석 목적", placeholder="예: 기변 예측 모델용 피처들의 품질 진단 및 변수 선택 가이드 요청", height=100)
+    analyst_goal = st.text_area("📝 상세 분석 목적", placeholder="피처 품질 진단 요청 사항 입력", height=100)
 
     if st.button("🔍 데이터 품질 진단 셋업 시작"):
-        with st.spinner("AI가 분석 목적을 이해하고 변수를 선별 중..."):
-            time.sleep(1.2)
+        with st.spinner("AI가 변수를 선별 중..."):
+            time.sleep(1)
             st.session_state.mapped_kor = ["고객 연령", "서비스 가입 기간(개월)", "최근 3개월 멤버십 이용 건수", "유무선 결합 여부", "최근 1개월 데이터 사용량"]
             st.session_state.step = 2
+            st.rerun()
 
-# --- STEP 3: 최종 분석 셋업 확인 (데이터 로드 후 노출) ---
+# --- STEP 3: 최종 분석 셋업 확인 ---
 if st.session_state.step >= 2:
     st.divider()
     st.header("Step 3. 최종 분석 셋업 확인 및 수정")
     
-    st.success(f"💡 AI가 분석 목적에 맞는 **{len(st.session_state.mapped_kor)}개**의 지표를 선별했습니다.")
+    # 에러 방지용 안전 장치: default 값이 ALL_KOR_NAMES 안에 있는지 한 번 더 확인
+    safe_defaults = [val for val in st.session_state.mapped_kor if val in ALL_KOR_NAMES]
     
-    # 지표 확인 및 수정
     selected_kor_final = st.multiselect(
         "✅ 최종 선택된 분석 지표",
         options=ALL_KOR_NAMES,
-        default=st.session_state.mapped_kor
+        default=safe_defaults
     )
 
-    # 카테고리별 탐색
     st.subheader("📂 카테고리별 전체 탐색")
     tab_titles = [f"{cat} ({len(items)})" for cat, items in META_TABLE.items()]
     tabs = st.tabs(tab_titles)
@@ -141,9 +148,9 @@ if st.session_state.step >= 2:
         with tabs[i]:
             cols = st.columns(3)
             for j, (eng, kor) in enumerate(items.items()):
+                # 체크박스로도 선택 가능하게 연동
                 cols[j % 3].checkbox(f"{kor}", key=f"chk_{eng}_{i}", value=(kor in selected_kor_final))
 
-    # 시스템 정보 및 실행
     with st.expander("🛠️ 시스템 추출 정보 (백엔드 매핑 확인)"):
         selected_eng_cols = [KOR_TO_ENG[k] for k in selected_kor_final if k in KOR_TO_ENG]
         st.code(f"Selected Columns: {', '.join(selected_eng_cols)}")
